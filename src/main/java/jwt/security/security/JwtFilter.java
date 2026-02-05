@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -30,16 +32,19 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
+        log.debug("request: {}", header);
 
         if (header != null && header.startsWith("Bearer ")) {
+            log.debug("Authorization header found");
             String token = header.substring(7);
             String username = jwtUtil.extractUsername(token);
-
+            log.debug("JWT username extracted: {}", username);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
+            log.debug("User authenticated: {}", userDetails.getUsername());
 
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
